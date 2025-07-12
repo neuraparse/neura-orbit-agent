@@ -1,0 +1,265 @@
+# Neura-Orbit-Agent Configuration
+# Copy this file to config.yaml and customize for your environment
+
+# =============================================================================
+# LLM Configuration
+# =============================================================================
+llm:
+  # Default provider to use (ollama, openai, anthropic)
+  default_provider: "ollama"
+  
+  # Model selection strategy (auto, manual, performance, cost)
+  selection_strategy: "auto"
+  
+  # Providers configuration
+  providers:
+    ollama:
+      base_url: "http://localhost:11434"
+      timeout: 60
+      models:
+        - name: "llava:latest"
+          capabilities: ["vision", "multimodal", "reasoning"]
+          context_length: 4096
+        - name: "gemma3:latest"
+          capabilities: ["reasoning", "coding", "general"]
+          context_length: 8192
+        - name: "phi4:latest"
+          capabilities: ["reasoning", "coding", "analysis"]
+          context_length: 16384
+    
+    openai:
+      api_key: "${OPENAI_API_KEY}"
+      organization: "${OPENAI_ORG_ID}"
+      timeout: 60
+      models:
+        - name: "gpt-4"
+          capabilities: ["reasoning", "coding", "analysis"]
+          context_length: 128000
+          cost_per_1k_tokens: 0.03
+        - name: "gpt-4-vision-preview"
+          capabilities: ["vision", "multimodal", "reasoning"]
+          context_length: 128000
+          cost_per_1k_tokens: 0.01
+        - name: "gpt-3.5-turbo"
+          capabilities: ["general", "fast"]
+          context_length: 16000
+          cost_per_1k_tokens: 0.001
+    
+    anthropic:
+      api_key: "${ANTHROPIC_API_KEY}"
+      timeout: 60
+      models:
+        - name: "claude-3-sonnet-20240229"
+          capabilities: ["reasoning", "analysis", "coding"]
+          context_length: 200000
+          cost_per_1k_tokens: 0.003
+        - name: "claude-3-haiku-20240307"
+          capabilities: ["fast", "general"]
+          context_length: 200000
+          cost_per_1k_tokens: 0.00025
+
+# =============================================================================
+# Screen Capture Configuration
+# =============================================================================
+screen:
+  # Capture settings
+  capture_interval: 1.0  # seconds
+  monitor: 0  # 0 for primary, -1 for all monitors
+  resolution: "auto"  # "auto", "1920x1080", "1280x720", etc.
+  
+  # Image processing
+  compression_quality: 85  # 1-100
+  format: "PNG"  # PNG, JPEG, WEBP
+  
+  # Performance
+  max_fps: 30
+  buffer_size: 10  # number of frames to keep in memory
+  
+  # Privacy
+  blur_sensitive_areas: false
+  exclude_regions: []  # [{"x": 0, "y": 0, "width": 100, "height": 100}]
+
+# =============================================================================
+# Security Configuration
+# =============================================================================
+security:
+  # Permission levels
+  require_confirmation: true
+  confirmation_timeout: 30  # seconds
+  
+  # Action categories and permissions
+  permissions:
+    safe_actions:
+      - "screenshot"
+      - "read_screen"
+      - "analyze_image"
+      - "get_window_info"
+    
+    moderate_actions:
+      - "click"
+      - "type"
+      - "scroll"
+      - "key_press"
+      - "open_application"
+    
+    restricted_actions:
+      - "file_delete"
+      - "system_shutdown"
+      - "install_software"
+      - "network_access"
+      - "admin_commands"
+  
+  # Audit logging
+  audit_log:
+    enabled: true
+    file_path: "logs/audit.log"
+    max_file_size: "10MB"
+    backup_count: 5
+
+# =============================================================================
+# Automation Configuration
+# =============================================================================
+automation:
+  # Browser automation
+  browser:
+    default: "chrome"  # chrome, firefox, safari, edge
+    headless: false
+    window_size: "1920x1080"
+    timeout: 30
+    user_data_dir: "browser_profiles"
+    
+    # Browser-specific options
+    chrome_options:
+      - "--no-sandbox"
+      - "--disable-dev-shm-usage"
+    
+    firefox_options:
+      - "--width=1920"
+      - "--height=1080"
+  
+  # Application automation
+  applications:
+    timeout: 30
+    retry_attempts: 3
+    retry_delay: 1.0
+    
+    # Application-specific settings
+    vscode:
+      executable_path: "auto"  # auto-detect or specify path
+      workspace_timeout: 10
+    
+    terminal:
+      default_shell: "auto"  # auto, bash, zsh, cmd, powershell
+      timeout: 60
+
+# =============================================================================
+# Agent Behavior Configuration
+# =============================================================================
+agent:
+  # Decision making
+  reasoning:
+    max_thinking_time: 30  # seconds
+    confidence_threshold: 0.7
+    fallback_strategy: "ask_user"
+  
+  # Task execution
+  execution:
+    max_retries: 3
+    retry_delay: 2.0
+    parallel_tasks: false
+    
+  # Learning and adaptation
+  learning:
+    save_successful_patterns: true
+    pattern_cache_size: 1000
+    adaptation_enabled: true
+
+# =============================================================================
+# API Configuration
+# =============================================================================
+api:
+  # Server settings
+  host: "localhost"
+  port: 8000
+  debug: false
+  
+  # Authentication
+  auth:
+    enabled: false
+    secret_key: "${API_SECRET_KEY}"
+    token_expiry: 3600  # seconds
+  
+  # Rate limiting
+  rate_limit:
+    enabled: true
+    requests_per_minute: 60
+    burst_size: 10
+
+# =============================================================================
+# Logging Configuration
+# =============================================================================
+logging:
+  # Log levels: DEBUG, INFO, WARNING, ERROR, CRITICAL
+  level: "INFO"
+  
+  # File logging
+  file:
+    enabled: true
+    path: "logs/neura-orbit.log"
+    max_size: "10MB"
+    backup_count: 5
+    format: "{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {name}:{function}:{line} - {message}"
+  
+  # Console logging
+  console:
+    enabled: true
+    colorize: true
+    format: "{time:HH:mm:ss} | {level: <8} | {message}"
+  
+  # Component-specific logging
+  components:
+    screen_capture: "INFO"
+    llm_manager: "INFO"
+    automation: "INFO"
+    security: "WARNING"
+
+# =============================================================================
+# Performance Configuration
+# =============================================================================
+performance:
+  # Memory management
+  memory:
+    max_image_cache_mb: 512
+    max_model_cache_mb: 1024
+    gc_threshold: 0.8
+  
+  # Processing
+  processing:
+    max_concurrent_tasks: 5
+    thread_pool_size: 10
+    async_timeout: 300
+  
+  # Caching
+  cache:
+    enabled: true
+    directory: "cache"
+    max_size_mb: 1024
+    ttl_seconds: 3600
+
+# =============================================================================
+# Development Configuration
+# =============================================================================
+development:
+  # Debug settings
+  debug: false
+  profiling: false
+  hot_reload: false
+  
+  # Testing
+  test_mode: false
+  mock_llm_responses: false
+  
+  # Development tools
+  tools:
+    enable_repl: false
+    enable_web_debugger: false
