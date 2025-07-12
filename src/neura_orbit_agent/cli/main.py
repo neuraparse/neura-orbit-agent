@@ -13,6 +13,7 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.prompt import Confirm, Prompt
 
 from ..core.agent_brain import NeuraOrbitAgent
+from ..core.advanced_agent_brain import AdvancedAgentBrain
 from ..utils.config import Config, load_config
 from ..utils.logger import setup_logging, get_cli_logger
 from ..utils.exceptions import NeuraOrbitError
@@ -87,8 +88,13 @@ def cli(ctx, config: Optional[Path], verbose: bool, debug: bool):
     is_flag=True,
     help="Analyze task without executing"
 )
+@click.option(
+    "--advanced",
+    is_flag=True,
+    help="Use 2025 advanced agent brain with full intelligence"
+)
 @click.pass_context
-def execute(ctx, task_description: str, provider: Optional[str], model: Optional[str], dry_run: bool):
+def execute(ctx, task_description: str, provider: Optional[str], model: Optional[str], dry_run: bool, advanced: bool):
     """Execute a natural language task."""
     
     async def run_task():
@@ -103,7 +109,11 @@ def execute(ctx, task_description: str, provider: Optional[str], model: Optional
                 
                 # Initialize agent
                 task = progress.add_task("Initializing agent...", total=None)
-                agent = NeuraOrbitAgent(config)
+                if advanced:
+                    console.print("🚀 [bold blue]Using 2025 Advanced Agent Brain[/bold blue]")
+                    agent = AdvancedAgentBrain(config)
+                else:
+                    agent = NeuraOrbitAgent(config)
                 
                 if dry_run:
                     # Just analyze the task
@@ -122,8 +132,11 @@ def execute(ctx, task_description: str, provider: Optional[str], model: Optional
                 else:
                     # Execute the task
                     progress.update(task, description="Executing task...")
-                    result = await agent.execute_task(task_description)
-                    
+                    if advanced:
+                        result = await agent.execute_intelligent_task(task_description)
+                    else:
+                        result = await agent.execute_task(task_description)
+
                     progress.update(task, description="Complete", completed=True)
                     
                     if result.success:
